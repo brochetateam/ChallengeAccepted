@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Juego de Little Bug</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        .retro-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+        .pixel-border {
+            border: 4px solid #28A745;
+            border-radius: 0;
+            box-shadow: 5px 5px 0 #1a682c;
+        }
+        .pixel-border-red {
+            border: 4px solid #E94560;
+            box-shadow: 5px 5px 0 #a32e43;
+        }
+        .pixel-border-yellow {
+            border: 4px solid #FFC107;
+            box-shadow: 5px 5px 0 #b18705;
+        }
+        .btn-hover:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0 #1a682c;
+        }
+        .btn-hover-red:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0 #a32e43;
+        }
+        .btn-hover-yellow:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0 #b18705;
+        }
+        
+        .pixel-border-purple {
+            border: 4px solid #7E22CE;
+            box-shadow: 5px 5px 0 #581C87;
+        }
+=======
+        /* Hide scrollbar while allowing scrolling */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        
+        body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .pixel-background {
+            background: repeating-linear-gradient(
+                45deg,
+                #4A4A4A,
+                #4A4A4A 5px,
+                #3d3d3d 5px,
+                #3d3d3d 10px
+            );
+        }
+        .little-bug {
+            animation: bug-bounce 3s infinite;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        .shame-box {
+            animation: fadeInShame 2s;
+        }
+        .bug-dance {
+            animation: dance 1s infinite;
+        }
+        
+        @keyframes bug-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes fadeInShame {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes dance {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(5deg); }
+        }
+        
+        .modal {
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="retro-font bg-white text-gray-800 h-screen flex flex-col overflow-hidden md:overflow-hidden">
+    <!-- Header -->
+    <header class="bg-green-700 p-4 border-b-4 border-green-500 relative">
+        <div class="container mx-auto text-center flex flex-col items-center justify-center px-2">
+            <p class="text-xs sm:text-sm md:text-base lg:text-lg mb-1 text-white italic">EL JUEGO DE LITTLE BUG:</p>
+            <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl text-white flex flex-row items-center justify-center gap-2 sm:gap-4">
+                <i class="fa-solid fa-bug little-bug text-4xl sm:text-3xl md:text-4xl lg:text-5xl"></i>
+                <span class="text-center flex flex-col">
+                    <span>¿TE ATREVES</span>
+                    <span>O NO TE ATREVES?</span>
+                </span>
+            </h1>
+        </div>
+        <!-- Puntos -->
+        <div id="puntos" class="absolute top-10 right-4">
+            <div class="p-1 sm:p-2 pixel-border-yellow bg-yellow-100 text-gray-800 flex items-center text-xs sm:text-base">
+                <span class="mr-1 sm:mr-2">🏆</span>
+                <span id="contador-puntos" class="font-bold">0</span>
+                <span class="ml-0 sm:ml-1 hidden sm:inline">Puntos</span>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Sección Principal -->
+    <main class="flex-grow container mx-auto px-2 sm:px-4 py-4 sm:py-8 bg-white mb-4 md:mb-0">
+        <div id="retos-container" class="max-w-3xl mx-auto bg-gray-800 text-white p-4 sm:p-6 pixel-border fade-in text-xs sm:text-sm">
+            <!-- El reto se cargará dinámicamente aquí -->
+        </div>
+        
+        <!-- Botones -->
+        <div class="flex justify-center mt-4 sm:mt-8 gap-2 sm:gap-4 flex-wrap">
+            <button id="aceptar-btn" class="pixel-border bg-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 transition-all btn-hover w-full sm:w-48 flex items-center justify-center text-sm sm:text-base">
+                <i class="fas fa-check mr-1 sm:mr-2"></i> ACEPTAR RETO
+            </button>
+            <button id="nuevo-btn" class="pixel-border-yellow bg-yellow-500 text-gray-800 px-4 py-2 sm:px-6 sm:py-3 transition-all btn-hover-yellow w-full sm:w-48 flex items-center justify-center text-sm sm:text-base">
+                <i class="fas fa-recycle mr-1 sm:mr-2"></i> NUEVO RETO
+            </button>
+            <button id="rechazar-btn" class="pixel-border-red bg-red-500 text-white px-4 py-2 sm:px-6 sm:py-3 transition-all btn-hover-red w-full sm:w-48 flex items-center justify-center text-sm sm:text-base">
+                <i class="fas fa-times mr-1 sm:mr-2"></i> RECHAZAR RETO
+            </button>
+        </div>
+        
+        <!-- Caja de la Vergüenza -->
+        <div id="shame-box" class="hidden"></div>
+    </main>
+
+    <!-- Modal de Reglas -->
+    <div id="modal-reglas" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 p-6 pixel-border max-w-md w-full">
+            <h2 class="text-2xl mb-4 text-center text-yellow-400">REGLAS DEL JUEGO</h2>
+            <div class="mb-4 text-white">
+                <p class="mb-2">1. Cada reto tiene una dificultad de 1 a 5 estrellas</p>
+                <p class="mb-2">2. Aceptar y completar el reto suma puntos</p>
+                <p class="mb-2">3. Rechazar el reto resta puntos (incluso bajo cero)</p>
+                <p class="mb-2">4. ¡Sé épico y diviértete!</p>
+            </div>
+            <button id="cerrar-reglas" class="pixel-border bg-green-500 text-white px-4 py-2 w-full">
+                ENTENDIDO
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para rechazar reto -->
+    <div id="modal-rechazar" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 sm:p-4 z-50">
+        <div class="bg-gray-800 p-4 sm:p-6 pixel-border-red max-w-md w-full mx-2">
+            <h2 class="text-2xl mb-4 text-center text-red-400">¡VAS A PERDER PUNTOS!</h2>
+            <div class="flex justify-center mb-4">
+                <img src="https://i.imgur.com/JRjXMxX.png" alt="Lata triste" class="h-24 w-24 object-contain">
+            </div>
+            <p class="mb-4 text-center text-white">Rechazar este reto te costará <strong class="text-white" id="puntos-rechazo">0</strong> puntos. ¿Estás seguro que no quieres ser épico?</p>
+            <div class="flex gap-4">
+                <button id="rechazar-confirmar" class="pixel-border-red bg-red-500 text-white px-4 py-2 flex-grow">
+                    SÍ, SOY BASIC
+                </button>
+                <button id="rechazar-cancelar" class="pixel-border bg-green-500 text-white px-4 py-2 flex-grow">
+                    NO, SERÉ ÉPICO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para aceptar reto -->
+    <div id="modal-aceptar" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 sm:p-4 z-50">
+        <div class="bg-gray-800 p-4 sm:p-6 pixel-border max-w-md w-full mx-2">
+            <h2 class="text-2xl mb-4 text-center text-green-400" id="modal-titulo">¡ACEPTASTE EL RETO!</h2>
+            <p class="mb-4 text-center text-white" id="modal-mensaje">¡Perfecto, Little Bug! Has aceptado el reto. Ahora demuestra que no eres un NPC. 🐞🎮 ¡A LA BATALLA!</p>
+            
+            <div class="mb-4">
+                <label for="clave-input" class="block mb-2 text-white">Ingresa la clave del reto:</label>
+                <input type="text" id="clave-input" class="w-full p-2 bg-gray-700 border-2 border-green-500 text-white">
+                <p id="clave-error" class="text-red-400 mt-2 hidden">Clave incorrecta, ¡intenta de nuevo!</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <button id="modal-cancelar" class="pixel-border-red bg-red-500 text-white px-4 py-2 flex-grow">CANCELAR</button>
+                <button id="modal-validar" class="pixel-border bg-green-500 text-white px-4 py-2 flex-grow">VALIDAR CLAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="bg-gray-900 p-2 sm:p-4 border-t-4 border-green-500">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
+            <p class="mb-2 sm:mb-0 text-center text-white text-xs sm:text-sm">© 2025 Little Bug Games</p>
+            <button id="reglas-btn" class="pixel-border bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 sm:px-6 sm:py-3 transition-all btn-hover flex items-center justify-center text-xs sm:text-base mt-2 sm:mt-0">
+                <i class="fas fa-book mr-2"></i> REGLAS DEL JUEGO
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // Lista de retos predefinidos
+        const retos = [
+            {
+                id: 1,
+                titulo: "EL LANZADOR DE PALOMITAS",
+                descripcion: "Debes lanzar una palomita al aire y atraparla con la boca frente a al menos dos compañeros, como si fueras un atleta olímpico. Antes de hacerlo, debes decir con voz épica '¡Palomitas!'",
+                requisito: "Debes atrapar la palomita en el primer intento y al menos una persona debe aplaudir o reírse. Si fallas, debes intentarlo de nuevo hasta lograrlo (máximo 3 intentos).",
+                dificultad: 4,
+                puntos: 25,
+                clave: "PALOMITAIRE"
+            },
+            {
+                id: 2,
+                titulo: "EL EQUILIBRISTA DEL CAFÉ",
+                descripcion: "Debes equilibrar un palito de madera para remover café en la punta de tu dedo durante al menos 10 segundos frente a al menos dos compañeros. Antes de hacerlo, debes decir con voz épica: '¡Café!'",
+                requisito: "Debes lograrlo en un máximo de 5 intentos y al menos una persona debe aplaudir o reírse. Si fallas, debes intentarlo de nuevo hasta lograrlo (máximo 3 intentos).",
+                dificultad: 3,
+                puntos: 20,
+                clave: "CAFEQUILIBRIO"
+            }
+        ];
+
+        // Nuevos elementos del DOM
+        const modalReglas = document.getElementById('modal-reglas');
+        const modalRechazar = document.getElementById('modal-rechazar');
+        const reglasBtn = document.getElementById('reglas-btn');
+        const cerrarReglas = document.getElementById('cerrar-reglas');
+        const rechazarConfirmar = document.getElementById('rechazar-confirmar');
+        const rechazarCancelar = document.getElementById('rechazar-cancelar');
+
+        // Elementos del DOM
+        const puntosElement = document.getElementById('contador-puntos');
+        const retosContainer = document.getElementById('retos-container');
+        const aceptarBtn = document.getElementById('aceptar-btn');
+        const nuevoBtn = document.getElementById('nuevo-btn');
+        const rechazarBtn = document.getElementById('rechazar-btn');
+        const shameBox = document.getElementById('shame-box');
+        const modal = document.getElementById('modal-aceptar');
+        const modalTitulo = document.getElementById('modal-titulo');
+        const modalMensaje = document.getElementById('modal-mensaje');
+        const claveInput = document.getElementById('clave-input');
+        const claveError = document.getElementById('clave-error');
+        const modalCancelar = document.getElementById('modal-cancelar');
+        const modalValidar = document.getElementById('modal-validar');
+        
+        // Variables de estado
+        let puntos = 0;
+        let retoActual = null;
+        let animating = false;
+
+        // Cargar puntos desde localStorage
+        if (localStorage.getItem('puntosLittleBug')) {
+            puntos = parseInt(localStorage.getItem('puntosLittleBug'));
+            puntosElement.textContent = puntos;
+        }
+
+        // Seleccionar un reto aleatorio
+        function obtenerRetoAleatorio() {
+            const indice = Math.floor(Math.random() * retos.length);
+            retoActual = retos[indice];
+            mostrarReto(retoActual);
+        }
+
+        // Mostrar el reto en el DOM
+        function mostrarReto(reto) {
+            // Limpiar contenido anterior
+            retosContainer.innerHTML = '';
+            
+            // Crear elementos para el reto
+            const titulo = document.createElement('h2');
+            titulo.className = 'text-xl md:text-2xl text-center mb-4 text-green-400 text-white';
+            titulo.textContent = reto.titulo;
+            
+            const descripcion = document.createElement('p');
+            descripcion.className = 'mb-4';
+            descripcion.innerHTML = `<span class="font-bold">Descripción:</span> ${reto.descripcion}`;
+            
+            const dificultad = document.createElement('div');
+            dificultad.className = 'flex items-center mb-2';
+            dificultad.innerHTML = `<span class="font-bold mr-2">Dificultad:</span>`;
+            
+            // Añadir estrellas según la dificultad
+            for (let i = 0; i < reto.dificultad; i++) {
+                const estrella = document.createElement('span');
+                estrella.textContent = '⭐';
+                estrella.className = 'mr-1 text-yellow-400';
+                dificultad.appendChild(estrella);
+            }
+            
+            const puntos = document.createElement('div');
+            puntos.className = 'flex items-center mb-4';
+            puntos.innerHTML = `<span class="font-bold mr-2">Recompensa:</span> 🏆 ${reto.puntos} puntos`;
+            
+            const detallesContainer = document.createElement('div');
+            detallesContainer.className = 'bg-gray-700 p-4 mb-4';
+            
+            // Añadir detalles adicionales si existen
+            if (reto.bonus) {
+                const bonus = document.createElement('p');
+                bonus.className = 'mb-2 text-green-300';
+                bonus.textContent = `🔥 ${reto.bonus}`;
+                detallesContainer.appendChild(bonus);
+            }
+            
+            if (reto.consequencia) {
+                const consequencia = document.createElement('p');
+                consequencia.className = 'mb-2 text-red-300';
+                consequencia.textContent = `⚠️ ${reto.consequencia}`;
+                detallesContainer.appendChild(consequencia);
+            }
+            
+            if (reto.requisito) {
+                const requisito = document.createElement('p');
+                requisito.className = 'mb-2 text-yellow-300';
+                requisito.textContent = `📋 ${reto.requisito}`;
+                detallesContainer.appendChild(requisito);
+            }
+            
+            if (reto.ejemplo) {
+                const ejemplo = document.createElement('p');
+                ejemplo.className = 'mb-2 italic text-blue-300';
+                ejemplo.textContent = `✏️ ${reto.ejemplo}`;
+                detallesContainer.appendChild(ejemplo);
+            }
+            
+            // Añadir ID al reto
+            const idReto = document.createElement('p');
+            idReto.className = 'text-sm text-gray-400 text-center mt-4';
+            idReto.textContent = `Reto #${reto.id}`;
+            
+            // Añadir elementos al contenedor
+            retosContainer.appendChild(titulo);
+            retosContainer.appendChild(descripcion);
+            retosContainer.appendChild(dificultad);
+            retosContainer.appendChild(puntos);
+            
+            if (detallesContainer.children.length > 0) {
+                retosContainer.appendChild(detallesContainer);
+            }
+            
+            retosContainer.appendChild(idReto);
+            
+            // Agregar clase para animación
+            retosContainer.classList.add('fade-in');
+            
+            // Ocultar la caja de la vergüenza
+            shameBox.classList.add('hidden');
+        }
+
+        // Validar la clave del reto
+        function validarClave() {
+            const clave = claveInput.value.trim().toUpperCase();
+            
+            if (clave === retoActual.clave) {
+                // Clave correcta
+                claveError.classList.add('hidden');
+                claveInput.classList.remove('border-red-500');
+                
+                // Agregar puntos
+                puntos += retoActual.puntos;
+                puntosElement.textContent = puntos;
+                localStorage.setItem('puntosLittleBug', puntos);
+                
+                // Mensaje de éxito
+                modalTitulo.textContent = "¡CORRECTO!";
+                modalMensaje.innerHTML = '¡Clave correcta! Haz la danza del bug 🐞🎉';
+                
+                // Animación del bug dance
+                if (!animating) {
+                    animating = true;
+                    modalTitulo.classList.add('bug-dance');
+                    
+                    // Quitar la animación después de 3 segundos
+                    setTimeout(() => {
+                        modalTitulo.classList.remove('bug-dance');
+                        animating = false;
+                    }, 3000);
+                }
+                
+                // Deshabilitar botón de validar
+                modalValidar.disabled = true;
+                
+                // Cerrar el modal después de 3 segundos
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    claveInput.value = '';
+                    modalValidar.disabled = false;
+                    modalTitulo.textContent = "¡ACEPTASTE EL RETO!";
+                    modalMensaje.innerHTML = "¡Perfecto, Little Bug! Has aceptado el reto. Ahora demuestra que no eres un NPC. 🐞🎮 ¡A LA BATALLA!";
+                }, 3000);
+            } else {
+                // Clave incorrecta
+                claveInput.classList.add('border-red-500');
+                claveError.classList.remove('hidden');
+                modal.classList.add('shake');
+                
+                setTimeout(() => {
+                    modal.classList.remove('shake');
+                }, 500);
+            }
+        }
+
+        // Event Listeners
+        aceptarBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+        });
+
+        nuevoBtn.addEventListener('click', () => {
+            obtenerRetoAleatorio();
+        });
+
+        rechazarBtn.addEventListener('click', () => {
+            if (retoActual) {
+                document.getElementById('puntos-rechazo').textContent = retoActual.puntos;
+            }
+            modalRechazar.classList.add('active');
+        });
+
+        rechazarConfirmar.addEventListener('click', () => {
+            puntos = Math.max(puntos - retoActual.puntos, -retoActual.puntos);
+            puntosElement.textContent = puntos;
+            localStorage.setItem('puntosLittleBug', puntos);
+            modalRechazar.classList.remove('active');
+            shameBox.classList.remove('hidden');
+            shameBox.classList.add('shame-box');
+        });
+
+        rechazarCancelar.addEventListener('click', () => {
+            modalRechazar.classList.remove('active');
+        });
+
+        reglasBtn.addEventListener('click', () => {
+            modalReglas.classList.add('active');
+        });
+
+        cerrarReglas.addEventListener('click', () => {
+            modalReglas.classList.remove('active');
+        });
+
+        modalCancelar.addEventListener('click', () => {
+            modal.classList.remove('active');
+            claveInput.value = '';
+            claveError.classList.add('hidden');
+            claveInput.classList.remove('border-red-500');
+        });
+
+        modalValidar.addEventListener('click', validarClave);
+
+        claveInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                validarClave();
+            }
+        });
+
+        // Inicializar el juego
+        document.addEventListener('DOMContentLoaded', () => {
+            obtenerRetoAleatorio();
+        });
+    </script>
+</body>
+</html>
